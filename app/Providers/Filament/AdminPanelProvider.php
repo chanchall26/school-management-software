@@ -21,6 +21,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use App\Filament\Admin\Pages\Auth\Login as TenantLogin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -35,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Simption')
             ->darkMode()
             ->spa()
-            ->login()
+            ->login(TenantLogin::class)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([

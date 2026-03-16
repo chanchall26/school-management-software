@@ -12,8 +12,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->nullable()->index();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('login_code')->nullable()->unique();
+            $table->boolean('is_active')->default(true)->index();
+            $table->timestamp('last_login_at')->nullable();
+            $table->string('last_login_ip', 45)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
