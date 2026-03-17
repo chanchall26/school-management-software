@@ -36,6 +36,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Simption')
             ->darkMode()
             ->spa()
+            ->spaUrlExceptions([
+                'admin/login',
+                'livewire/*',
+            ])
             ->login(TenantLogin::class)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
@@ -48,11 +52,11 @@ class AdminPanelProvider extends PanelProvider
                 FilamentInfoWidget::class,
             ])
             ->middleware([
-                InitializeTenancyByDomain::class,
-                PreventAccessFromCentralDomains::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                InitializeTenancyByDomain::class,
+                PreventAccessFromCentralDomains::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,

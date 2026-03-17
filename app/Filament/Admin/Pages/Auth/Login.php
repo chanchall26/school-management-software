@@ -16,17 +16,19 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
-    public int $activeTab = 1;
-
     public function getHeading(): string
     {
         $tenantName = (string) (tenant('name') ?? data_get(tenant('data'), 'name') ?? tenant('id') ?? 'Simption');
@@ -34,75 +36,130 @@ class Login extends BaseLogin
         return $tenantName . ' — Login';
     }
 
+    /**
+     * In your version of Filament, the form method uses the new Schema system.
+     */
     public function form(Schema $schema): Schema
     {
+        // Check central database for allowed methods
+        $methods = DB::connection('central')
+            ->table('tenant_login_methods')
+            ->where('tenant_id', tenant('id'))
+            ->first();
+
+        // Fallback to tenant data if table row is missing
+        $isOtpEmail = $methods->method_otp_email ?? in_array('otp', tenant('data')['login_methods'] ?? []);
+        $isPassword = $methods->method_password ?? in_array('password', tenant('data')['login_methods'] ?? ['password']);
+        $isLoginCode = $methods->method_login_code ?? in_array('code', tenant('data')['login_methods'] ?? []);
+        $isOtpMobile = $methods->method_otp_mobile ?? in_array('mobile', tenant('data')['login_methods'] ?? []);
+
+        $tabs = [];
+
+        if ($isOtpEmail) {
+            $tabs[] = Tab::make('OTP (Email)')
+                ->id('otp_email')
+                ->schema([
+                    Section::make()
+                        ->schema([
+                            TextInput::make('otp_email')
+                                ->label('Email')
+                                ->email(),
+                            TextInput::make('otp')
+                                ->label('OTP')
+                                ->helperText('Enter the 6-digit OTP. Submit without OTP to send one.')
+                                ->numeric()
+                                ->minLength(6)
+                                ->maxLength(6),
+                        ]),
+                ]);
+        }
+
+        if ($isPassword) {
+            $tabs[] = Tab::make('ID + Password')
+                ->id('password')
+                ->schema([
+                    Section::make()
+                        ->schema([
+                            TextInput::make('email')
+                                ->label('Email')
+                                ->email(),
+                            TextInput::make('password')
+                                ->label('Password')
+                                ->password(),
+                        ]),
+                ]);
+        }
+
+        if ($isLoginCode) {
+            $tabs[] = Tab::make('Login Code')
+                ->id('login_code')
+                ->schema([
+                    Section::make()
+                        ->schema([
+                            TextInput::make('login_code_input')
+                                ->label('Login Code')
+                                ->autocomplete(false),
+                        ]),
+                ]);
+        }
+
+        if ($isOtpMobile) {
+            $tabs[] = Tab::make('Mobile OTP')
+                ->id('otp_mobile')
+                ->schema([
+                    Section::make()
+                        ->schema([
+                            TextInput::make('otp_phone')
+                                ->label('Mobile number')
+                                ->tel(),
+                            TextInput::make('otp_mobile_input')
+                                ->label('OTP')
+                                ->numeric()
+                                ->minLength(6)
+                                ->maxLength(6),
+                        ]),
+                ]);
+        }
+
+        // Determine default tab
+        $defaultTab = 'password';
+        if ($isOtpEmail) $defaultTab = 'otp_email';
+        elseif ($isPassword) $defaultTab = 'password';
+        elseif ($isLoginCode) $defaultTab = 'login_code';
+        elseif ($isOtpMobile) $defaultTab = 'otp_mobile';
+
         return $schema
             ->statePath('data')
             ->components([
-                Tabs::make()
-                    ->livewireProperty('activeTab')
-                    ->tabs([
-                        Tab::make('OTP (Email)')
-                            ->schema([
-                                Section::make()
-                                    ->schema([
-                                        TextInput::make('otp_email')
-                                            ->label('Email')
-                                            ->email()
-                                            ->required(),
-                                        TextInput::make('otp')
-                                            ->label('OTP')
-                                            ->helperText('Enter the 6-digit OTP. Submit without OTP to send one.')
-                                            ->numeric()
-                                            ->minLength(6)
-                                            ->maxLength(6),
-                                    ]),
-                            ]),
-                        Tab::make('ID + Password')
-                            ->schema([
-                                Section::make()
-                                    ->schema([
-                                        TextInput::make('email')
-                                            ->label('Email')
-                                            ->email()
-                                            ->required(),
-                                        TextInput::make('password')
-                                            ->label('Password')
-                                            ->password()
-                                            ->required(),
-                                    ]),
-                            ]),
-                        Tab::make('Login Code')
-                            ->schema([
-                                Section::make()
-                                    ->schema([
-                                        TextInput::make('login_code')
-                                            ->label('Login Code')
-                                            ->required()
-                                            ->autocomplete(false),
-                                    ]),
-                            ]),
-                        Tab::make('Mobile OTP')
-                            ->schema([
-                                Section::make()
-                                    ->schema([
-                                        TextInput::make('otp_phone')
-                                            ->label('Mobile number')
-                                            ->tel()
-                                            ->required(),
-                                        TextInput::make('otp_mobile')
-                                            ->label('OTP')
-                                            ->numeric()
-                                            ->minLength(6)
-                                            ->maxLength(6),
-                                    ]),
-                            ]),
-                    ]),
+                // We use the Hidden component from Forms, but wrap it in Schema
+                Hidden::make('active_tab')
+                    ->id('hidden_active_tab')
+                    ->default($defaultTab),
+
+                // Professional silent sync using a Placeholder
+                Placeholder::make('tab_sync')
+                    ->hiddenLabel()
+                    ->content(new HtmlString('
+                        <div x-init="$watch(\'tab\', value => { 
+                            let el = document.getElementById(\'hidden_active_tab\'); 
+                            if(el) { 
+                                el.value = value; 
+                                el.dispatchEvent(new Event(\'input\', { bubbles: true })); 
+                            } 
+                        })"></div>
+                    ')),
+
+                Tabs::make('auth_tabs')
+                    ->persistTabInQueryString()
+                    ->tabs($tabs),
             ]);
     }
 
     public function authenticate(): ?\Filament\Auth\Http\Responses\Contracts\LoginResponse
     {
+        $data = $this->form->getState();
+        $activeTab = $data['active_tab'] ?? 'password';
+
         try {
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
@@ -111,16 +168,16 @@ class Login extends BaseLogin
                 ->danger()
                 ->send();
 
-            $this->logAttempt(method: $this->currentMethod(), success: false, reason: 'rate_limited');
+            $this->logAttempt(method: $activeTab, success: false, reason: 'rate_limited');
 
             return null;
         }
 
-        return match ($this->activeTab) {
-            1 => $this->authenticateOtpEmail(),
-            2 => $this->authenticatePassword(),
-            3 => $this->authenticateLoginCode(),
-            4 => $this->authenticateMobileOtpPlaceholder(),
+        return match ($activeTab) {
+            'otp_email' => $this->authenticateOtpEmail(),
+            'password' => $this->authenticatePassword(),
+            'login_code' => $this->authenticateLoginCode(),
+            'otp_mobile' => $this->authenticateMobileOtpPlaceholder(),
             default => $this->authenticatePassword(),
         };
     }
@@ -202,19 +259,19 @@ class Login extends BaseLogin
     private function authenticateLoginCode(): ?\Filament\Auth\Http\Responses\Contracts\LoginResponse
     {
         $data = $this->form->getState();
-        $code = (string) ($data['login_code'] ?? '');
+        $code = (string) ($data['login_code_input'] ?? '');
 
         /** @var User|null $user */
         $user = User::query()->where('login_code', $code)->first();
 
         if (! $user) {
             $this->logAttempt(method: 'code', identifier: $code, success: false, reason: 'invalid_code');
-            throw ValidationException::withMessages(['data.login_code' => 'Invalid login code.']);
+            throw ValidationException::withMessages(['data.login_code_input' => 'Invalid login code.']);
         }
 
         if (! $user->is_active) {
             $this->logAttempt(method: 'code', user: $user, identifier: $code, success: false, reason: 'inactive');
-            throw ValidationException::withMessages(['data.login_code' => 'Account is disabled.']);
+            throw ValidationException::withMessages(['data.login_code_input' => 'Account is disabled.']);
         }
 
         Filament::auth()->login($user, remember: false);
@@ -295,16 +352,4 @@ class Login extends BaseLogin
             'created_at' => Carbon::now(),
         ]);
     }
-
-    private function currentMethod(): string
-    {
-        return match ($this->activeTab) {
-            1 => 'otp_email',
-            2 => 'password',
-            3 => 'code',
-            4 => 'otp_mobile',
-            default => 'password',
-        };
-    }
 }
-
