@@ -35,4 +35,31 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Providers — set SMS_PROVIDER in .env to activate
+    | Supported: "fast2sms" | "msg91" | "twilio" | "none"
+    |--------------------------------------------------------------------------
+    */
+    'sms' => [
+        'provider'  => env('SMS_PROVIDER', 'none'),
+        'from_name' => env('SMS_FROM_NAME', 'Simption'),
+
+        'fast2sms' => [
+            'api_key' => env('SMS_FAST2SMS_API_KEY'),
+        ],
+
+        'msg91' => [
+            'api_key'     => env('SMS_MSG91_API_KEY'),
+            'sender_id'   => env('SMS_MSG91_SENDER_ID', 'SIMPTION'),
+            'template_id' => env('SMS_MSG91_TEMPLATE_ID'),
+        ],
+
+        'twilio' => [
+            'sid'   => env('SMS_TWILIO_SID'),
+            'token' => env('SMS_TWILIO_TOKEN'),
+            'from'  => env('SMS_TWILIO_FROM'),
+        ],
+    ],
+
 ];

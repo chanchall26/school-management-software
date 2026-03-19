@@ -15,37 +15,44 @@ class TenantSeeder extends Seeder
     {
         $tenants = [
             [
-                'id' => 'dps',
-                'name' => 'DPS Indore',
-                'domain' => 'dps.localhost',
+                'id'          => 'dps',
+                'name'        => 'DPS Indore',
+                'domain'      => 'dps.localhost',
                 'admin_email' => 'admin@dps.com',
-                'modules' => ['attendance', 'fees', 'exam', 'library'],
+                'modules'     => ['attendance', 'fees', 'exam', 'library'],
+                // Drop logo file at: public/storage/logos/dps/school_1.png
+                'logo'        => 'logos/dps/school_1.png',
             ],
             [
-                'id' => 'ryan',
-                'name' => 'Ryan International',
-                'domain' => 'ryan.localhost',
+                'id'          => 'ryan',
+                'name'        => 'Ryan International',
+                'domain'      => 'ryan.localhost',
                 'admin_email' => 'admin@ryan.com',
-                'modules' => ['attendance', 'fees'],
+                'modules'     => ['attendance', 'fees'],
+                // Drop logo file at: public/storage/logos/ryan/school_1.png
+                'logo'        => 'logos/ryan/school_1.png',
             ],
             [
-                'id' => 'delhi',
-                'name' => 'Delhi Public School',
-                'domain' => 'delhi.localhost',
+                'id'          => 'delhi',
+                'name'        => 'Delhi Public School',
+                'domain'      => 'delhi.localhost',
                 'admin_email' => 'admin@delhi.com',
-                'modules' => ['attendance', 'fees', 'exam'],
+                'modules'     => ['attendance', 'fees', 'exam'],
+                // Drop logo file at: public/storage/logos/delhi/school_1.png
+                'logo'        => 'logos/delhi/school_1.png',
             ],
         ];
 
         foreach ($tenants as $t) {
             /** @var Tenant $tenant */
+            // Stancl/Tenancy v3: pass non-custom-column attrs directly.
+            // They are stored in the data JSON column automatically.
             $tenant = Tenant::updateOrCreate(
                 ['id' => $t['id']],
                 [
-                    'name' => $t['name'],
-                    'data' => [
-                        'modules' => $t['modules'],
-                    ],
+                    'name'    => $t['name'],
+                    'logo'    => $t['logo'] ?? null,
+                    'modules' => $t['modules'],
                 ],
             );
 

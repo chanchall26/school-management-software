@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Teal,
             ])
             ->brandName('Simption')
-            ->darkMode()
+            ->darkMode(false)
             ->spa()
             ->spaUrlExceptions([
                 'admin/login',
