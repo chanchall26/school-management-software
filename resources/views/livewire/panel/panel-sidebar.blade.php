@@ -62,17 +62,15 @@
     </div>
 
     {{-- SECURITY section --}}
-    @php $securityEnabled = \App\Support\ModuleRegistry::isEnabled('security'); @endphp
     <div class="smp-nav-section mb-1">
         <p class="smp-nav-section-label px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Security
         </p>
 
         <x-panel.nav-item
-            :href="$securityEnabled ? '/panel/security' : '#'"
+            href="/panel/security"
             :active="request()->routeIs('panel.security.center')"
             label="Security Center"
-            :badge="$securityEnabled ? null : 'Soon'"
         >
             <x-slot:icon>
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -81,10 +79,9 @@
         </x-panel.nav-item>
 
         <x-panel.nav-item
-            :href="$securityEnabled ? '/panel/security/login-attempts' : '#'"
+            href="/panel/security/login-attempts"
             :active="request()->routeIs('panel.security.login-attempts')"
             label="Login Attempts"
-            :badge="$securityEnabled ? null : 'Soon'"
         >
             <x-slot:icon>
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -93,10 +90,9 @@
         </x-panel.nav-item>
 
         <x-panel.nav-item
-            :href="$securityEnabled ? '/panel/security/settings' : '#'"
+            href="/panel/security/settings"
             :active="request()->routeIs('panel.security.settings')"
             label="Security Settings"
-            :badge="$securityEnabled ? null : 'Soon'"
         >
             <x-slot:icon>
                 <path stroke-linecap="round" stroke-linejoin="round"
