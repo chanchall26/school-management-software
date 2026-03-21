@@ -108,7 +108,7 @@
                                                 $hue = crc32($user->email) % 360;
                                             @endphp
                                             <div class="w-9 h-9 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-sm text-[11px] font-bold text-white"
-                                                style="background: hsl({{ $hue }}, 55%, 52%)">
+                                                :style="{ background: 'hsl({{ $hue }}, 55%, 52%)' }">
                                                 {{ $initials }}
                                             </div>
                                         @endif
@@ -270,7 +270,7 @@
                         $ph = crc32($previewUser->email) % 360;
                     @endphp
                     <div class="w-16 h-16 rounded-full flex items-center justify-center ring-4 ring-white dark:ring-slate-800 shadow-md text-base font-bold text-white"
-                        style="background: hsl({{ $ph }}, 55%, 52%)">{{ $pi }}</div>
+                        :style="{ background: 'hsl({{ $ph }}, 55%, 52%)' }">{{ $pi }}</div>
                 @endif
                 <div>
                     <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ $previewUser->name }}</h3>
