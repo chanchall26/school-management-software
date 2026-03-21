@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Users\Actions;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 
 class CreateUser
 {
@@ -23,7 +22,7 @@ class CreateUser
             'phone'              => $data['phone'] ?? null,
             'password'           => $data['password'],
             'login_code'         => User::generateLoginCode(),
-            'is_active'          => true,
+            'is_active'          => $data['is_active'] ?? true,
             'avatar'             => $avatarPath,
             'role_type'          => $data['role_type'] ?? 'staff',
             'role_label'         => ($data['role_type'] ?? 'staff') === 'other' ? ($data['role_label'] ?? null) : null,

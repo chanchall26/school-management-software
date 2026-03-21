@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+@endphp
 {{-- Users List Page --}}
 <div class="smp-page-content">
 
@@ -13,11 +17,11 @@
                     Import Users
                 </button>
                 <button wire:click="openCreate"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white shadow-sm hover:shadow-indigo-200 dark:hover:shadow-indigo-900/40 transition-all duration-150">
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white shadow-sm transition-all duration-150">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                     </svg>
-                    New User
+                    Create User
                 </button>
             </div>
         </x-slot:action>
@@ -168,24 +172,25 @@
 
                             {{-- Actions --}}
                             <td class="px-4 py-3 text-right" wire:click.stop>
-                                <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button wire:click="openEdit({{ $user->id }})"
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:border-indigo-700 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/30 transition-all">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/>
-                                        </svg>
-                                        Edit
+                                <div class="flex items-center justify-end gap-1">
+                                    {{-- View --}}
+                                    <button wire:click="openPreview({{ $user->id }})"
+                                        title="View"
+                                        class="w-7 h-7 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:border-teal-300 hover:text-teal-600 hover:bg-teal-50 dark:hover:border-teal-700 dark:hover:text-teal-400 dark:hover:bg-teal-950/30 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
                                     </button>
-                                    <button wire:click="toggleActive({{ $user->id }})"
-                                        wire:confirm="{{ $user->is_active ? 'Deactivate this user?' : 'Activate this user?' }}"
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md border transition-all {{ $user->is_active ? 'border-red-200 text-red-600 bg-white hover:bg-red-50 dark:border-red-800/60 dark:text-red-400 dark:bg-slate-800 dark:hover:bg-red-950/30' : 'border-green-200 text-green-700 bg-white hover:bg-green-50 dark:border-green-800/60 dark:text-green-400 dark:bg-slate-800 dark:hover:bg-green-950/30' }}">
-                                        @if($user->is_active)
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                                            Deactivate
-                                        @else
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                                            Activate
-                                        @endif
+                                    {{-- Edit --}}
+                                    <button wire:click="openEdit({{ $user->id }})"
+                                        title="Edit"
+                                        class="w-7 h-7 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:border-indigo-700 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/30 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+                                    </button>
+                                    {{-- Delete --}}
+                                    <button wire:click="deleteUser({{ $user->id }})"
+                                        wire:confirm="Permanently delete {{ $user->name }}? This cannot be undone."
+                                        title="Delete"
+                                        class="w-7 h-7 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:border-red-300 hover:text-red-600 hover:bg-red-50 dark:hover:border-red-700 dark:hover:text-red-400 dark:hover:bg-red-950/30 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
                                     </button>
                                 </div>
                             </td>
@@ -372,16 +377,24 @@
         </div>
 
         {{-- Footer actions --}}
-        <div class="shrink-0 px-5 py-4 border-t border-slate-100 dark:border-slate-800 flex gap-2">
-            <button wire:click="openEdit({{ $previewUser->id }})"
-                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
-                Edit User
-            </button>
-            <button wire:click="toggleActive({{ $previewUser->id }})"
-                wire:confirm="{{ $previewUser->is_active ? 'Deactivate this user?' : 'Activate this user?' }}"
-                class="inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border transition-colors {{ $previewUser->is_active ? 'border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400' : 'border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400' }}">
-                {{ $previewUser->is_active ? 'Deactivate' : 'Activate' }}
+        <div class="shrink-0 px-5 py-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <div class="flex gap-2">
+                <button wire:click="openEdit({{ $previewUser->id }})"
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+                    Edit
+                </button>
+                <button wire:click="toggleActive({{ $previewUser->id }})"
+                    wire:confirm="{{ $previewUser->is_active ? 'Deactivate this user?' : 'Activate this user?' }}"
+                    class="inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border transition-colors {{ $previewUser->is_active ? 'border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400' : 'border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400' }}">
+                    {{ $previewUser->is_active ? 'Deactivate' : 'Activate' }}
+                </button>
+            </div>
+            <button wire:click="deleteUser({{ $previewUser->id }})"
+                wire:confirm="Permanently delete {{ $previewUser->name }}? This cannot be undone."
+                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+                Delete User
             </button>
         </div>
         @endif
@@ -544,10 +557,10 @@
                     <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Profile Photo</label>
                     <div class="flex items-center gap-4">
                         <div class="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/30 flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-md shrink-0">
-                            @if($avatar)
-                                <img src="{{ $avatar->temporaryUrl() }}" class="w-full h-full object-cover" alt="Preview">
-                            @elseif($editingId && ($editingUser = App\Models\User::find($editingId)) && $editingUser?->avatar)
-                                <img src="{{ Storage::url($editingUser->avatar) }}" class="w-full h-full object-cover" alt="Current avatar">
+                            @if($this->getAvatarPreview())
+                                <img src="{{ $this->getAvatarPreview() }}" class="w-full h-full object-cover" alt="Preview">
+                            @elseif($this->getEditingUserAvatar())
+                                <img src="{{ $this->getEditingUserAvatar() }}" class="w-full h-full object-cover" alt="Current avatar">
                             @else
                                 <svg class="w-7 h-7 text-indigo-300 dark:text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
                             @endif
@@ -771,5 +784,10 @@
         </div>
 
     </div>
+
+    {{-- ════════════════════════════════════════════════════════════════════════
+         SHARED CREATE USER FORM
+         ════════════════════════════════════════════════════════════════════ --}}
+    @livewire(\App\Livewire\Shared\CreateUserForm::class)
 
 </div>

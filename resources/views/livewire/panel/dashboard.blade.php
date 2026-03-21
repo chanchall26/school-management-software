@@ -7,11 +7,12 @@
         subtitle="Welcome back — here's what's happening at your school today."
     >
         <x-slot:action>
-            <button class="smp-btn-outline text-xs gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+            <button wire:click="$dispatch('open-create-user-form')"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white shadow-sm transition-all duration-150">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
-                Refresh
+                Create User
             </button>
         </x-slot:action>
     </x-panel.page-header>
@@ -179,5 +180,8 @@
             </span>
         </div>
     </x-panel.card>
+
+    {{-- Shared Create User Form --}}
+    @livewire(\App\Livewire\Shared\CreateUserForm::class)
 
 </div>

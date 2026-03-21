@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Users\Livewire;
 
 use App\Models\User;
-use App\Modules\Users\Actions\CreateUser;
 use App\Modules\Users\Actions\ToggleUserStatus;
 use App\Modules\Users\Actions\UpdateUser;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -86,12 +86,13 @@ class UserList extends Component
 
     public function openCreate(): void
     {
-        $this->resetForm();
-        $this->showForm = true;
-        $this->showPreview = false;
-        $this->showImport = false;
-        $this->step = 1;
-        $this->editingId = null;
+        $this->dispatch('open-create-user-form');
+    }
+
+    #[On('user-created')]
+    public function onUserCreated(): void
+    {
+        $this->resetPage();
     }
 
     public function openEdit(int $id): void
@@ -171,8 +172,6 @@ class UserList extends Component
 
         if ($this->editingId) {
             (new UpdateUser)->handle(User::findOrFail($this->editingId), $data);
-        } else {
-            (new CreateUser)->handle($data);
         }
 
         $this->cancelForm();
@@ -198,6 +197,18 @@ class UserList extends Component
     {
         $this->showImport   = false;
         $this->importEmails = '';
+    }
+
+    // ── Delete user ───────────────────────────────────────────────────────────
+
+    public function deleteUser(int $id): void
+    {
+        User::findOrFail($id)->delete();
+
+        if ($this->previewId === $id) {
+            $this->showPreview = false;
+            $this->previewId   = null;
+        }
     }
 
     // ── Toggle active ─────────────────────────────────────────────────────────
@@ -245,6 +256,32 @@ class UserList extends Component
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    public function getAvatarPreview(): ?string
+    {
+        if (! $this->avatar) {
+            return null;
+        }
+
+        try {
+            return $this->avatar->temporaryUrl();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    public function getEditingUserAvatar(): ?string
+    {
+        if (! $this->editingId) {
+            return null;
+        }
+
+        $user = User::find($this->editingId);
+
+        return ($user && $user->avatar)
+            ? \Illuminate\Support\Facades\Storage::url($user->avatar)
+            : null;
+    }
 
     private function resetForm(): void
     {
