@@ -44,14 +44,14 @@ class LoginAttempts extends Component
         };
 
         $attempts = LoginAttempt::with('user')
-            ->where('attempted_at', '>=', $since)
+            ->where('created_at', '>=', $since)
             ->when($this->search, fn ($q) => $q->where(function ($q) {
-                $q->where('email', 'like', '%' . $this->search . '%')
+                $q->where('identifier', 'like', '%' . $this->search . '%')
                   ->orWhere('ip_address', 'like', '%' . $this->search . '%');
             }))
             ->when($this->filter === 'failed', fn ($q) => $q->where('is_success', false))
             ->when($this->filter === 'success', fn ($q) => $q->where('is_success', true))
-            ->latest('attempted_at')
+            ->latest('created_at')
             ->paginate(20);
 
         return view('livewire.modules.security.login-attempts', compact('attempts'));

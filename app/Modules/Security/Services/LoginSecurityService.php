@@ -27,13 +27,13 @@ class LoginSecurityService
     ): LoginAttempt {
         return LoginAttempt::create([
             'user_id'        => User::where('email', $email)->value('id'),
-            'email'          => $email,
+            'identifier'     => $email,
+            'method'         => 'password',
             'ip_address'     => $ip,
-            'user_agent'     => $userAgent,
+            'user_agent'     => $userAgent ? mb_substr($userAgent, 0, 500) : null,
             'is_success'     => $success,
             'failure_reason' => $failureReason,
-            'system_info'    => $systemInfo,
-            'attempted_at'   => now(),
+            'created_at'     => now(),
         ]);
     }
 
@@ -51,7 +51,7 @@ class LoginSecurityService
         return false;
     }
 
-    public function recordFailedAttempt(User $user, string $ip): void
+    public function recordFailedAttempt(User $user): void
     {
         $user->increment('failed_login_attempts');
         $user->update(['last_failed_attempt' => now()]);

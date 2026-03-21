@@ -7,31 +7,30 @@ namespace App\Modules\Security\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LoginAttempt extends Model
 {
-    use SoftDeletes;
+    // Points to the central login_activities table (no separate login_attempts table).
+    protected $table = 'login_activities';
 
     public $timestamps = false;
 
     protected $fillable = [
         'user_id',
-        'email',
+        'identifier',   // email / phone / code
+        'method',
         'ip_address',
         'user_agent',
         'is_success',
         'failure_reason',
-        'system_info',
-        'attempted_at',
+        'created_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_success'   => 'bool',
-            'system_info'  => 'json',
-            'attempted_at' => 'datetime',
+            'is_success' => 'bool',
+            'created_at' => 'datetime',
         ];
     }
 
@@ -40,11 +39,11 @@ class LoginAttempt extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function getFailedAttempts(string $email, int $minutes = 30): int
+    public static function getFailedAttempts(string $identifier, int $minutes = 30): int
     {
-        return self::where('email', $email)
+        return self::where('identifier', $identifier)
             ->where('is_success', false)
-            ->where('attempted_at', '>=', now()->subMinutes($minutes))
+            ->where('created_at', '>=', now()->subMinutes($minutes))
             ->count();
     }
 
@@ -52,7 +51,7 @@ class LoginAttempt extends Model
     {
         return self::where('ip_address', $ip)
             ->where('is_success', false)
-            ->where('attempted_at', '>=', now()->subMinutes($minutes))
+            ->where('created_at', '>=', now()->subMinutes($minutes))
             ->count();
     }
 }

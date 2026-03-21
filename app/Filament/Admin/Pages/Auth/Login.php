@@ -597,7 +597,7 @@ class Login extends BaseLogin
             'is_success'     => $success,
             'failure_reason' => $reason,
             'ip_address'     => request()->ip(),
-            'user_agent'     => request()->userAgent(),
+            'user_agent'     => mb_substr((string) request()->userAgent(), 0, 500),
             'created_at'     => Carbon::now(),
         ]);
     }

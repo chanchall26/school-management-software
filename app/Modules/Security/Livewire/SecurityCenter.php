@@ -41,20 +41,20 @@ class SecurityCenter extends Component
             ->count();
 
         $this->failedToday  = LoginAttempt::where('is_success', false)
-            ->where('attempted_at', '>=', now()->startOfDay())
+            ->where('created_at', '>=', now()->startOfDay())
             ->count();
 
         $this->successToday = LoginAttempt::where('is_success', true)
-            ->where('attempted_at', '>=', now()->startOfDay())
+            ->where('created_at', '>=', now()->startOfDay())
             ->count();
 
         $this->failedThisWeek = LoginAttempt::where('is_success', false)
-            ->where('attempted_at', '>=', now()->startOfWeek())
+            ->where('created_at', '>=', now()->startOfWeek())
             ->count();
 
         $this->recentFailed = LoginAttempt::where('is_success', false)
-            ->where('attempted_at', '>=', now()->subHours(24))
-            ->latest('attempted_at')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->latest('created_at')
             ->limit(8)
             ->get();
 
